@@ -1,4 +1,4 @@
-const API_URL = 'https://apimocker.com/users/search'
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.apimocker.com/users/search'
 
 export async function searchUsers(query, signal) {
     const response = await fetch(
@@ -7,12 +7,16 @@ export async function searchUsers(query, signal) {
     )
 
     if (!response.ok) {
-        throw new Error('Ошибка запроса')
+        throw new Error(`Ошибка запроса: ${response.status}`)
     }
 
     const data = await response.json()
 
-    console.log(data)
-
+    // Защита: если API вернет массив напрямую, используем его. 
+    // Иначе ищем поле results, как было изначально.
+    if (Array.isArray(data)) {
+        return data
+    }
+    
     return data.results || []
 }

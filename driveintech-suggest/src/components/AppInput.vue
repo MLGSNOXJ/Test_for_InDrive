@@ -6,7 +6,6 @@
         <img :src="leftIconSrc" alt="Input logo" class="input-logo-svg" />
       </div>
 
-      <!-- Поле ввода с тегом -->
       <div class="cursor-and-value">
         <div class="selected-users">
           <div v-if="selectedUser" class="user-tag">
@@ -31,26 +30,21 @@
         />
       </div>
 
-      <!-- Правая иконка -->
       <div class="search-icon-right" v-if="rightIconSrc">
         <img :src="rightIconSrc" alt="Search" class="search-icon-svg" />
       </div>
     </div>
 
-    <!-- Выпадающий список результатов со скроллом -->
-    <!-- Transition теперь содержит ТОЛЬКО ОДИН корневой div -->
     <transition name="slide-down">
       <div 
         v-if="isFocused && searchQuery.length > 0 && !selectedUser" 
         class="search-results" 
         ref="resultsRef"
       >
-        <!-- Состояние загрузки -->
         <div v-if="isLoading" class="result-item" style="color: #8D8D8D; cursor: default;">
           Загрузка...
         </div>
 
-        <!-- Список результатов -->
         <template v-else-if="filteredUsers.length > 0">
           <div 
             v-for="(user, index) in filteredUsers" 
@@ -65,7 +59,6 @@
           </div>
         </template>
 
-        <!-- Состояние "Ничего не найдено" -->
         <div v-else class="result-item" style="color: #8D8D8D; cursor: default;">
           Ничего не найдено
         </div>
@@ -76,11 +69,8 @@
 
 <script setup>
 import { ref, computed, nextTick, watch, onUnmounted } from 'vue'
-// Убедись, что пути к твоим файлам корректны
 import { useDebounce } from '../composables/useDebounce' 
 import { searchUsers } from '../api/userApi' 
-
-// ВАЖНО: суффикс ?url говорит Vite вернуть строку с путем к файлу
 import fingerCursorSrc from '../assets/finger.svg?url'
 
 const props = defineProps({
@@ -104,7 +94,6 @@ const selectedUser = ref(null)
 const highlightedIndex = ref(-1)
 const isLoading = ref(false)
 
-let blurTimeout = null
 let abortController = null
 const apiUsers = ref([])
 
@@ -125,14 +114,12 @@ watch(debouncedValue, async (newQuery) => {
     apiUsers.value = results
   } catch (error) {
     if (error.name !== 'AbortError') {
-      console.error('Ошибка поиска:', error)
     }
   } finally {
     isLoading.value = false
   }
 })
 
-// === ИСПРАВЛЕНИЕ: Добавлена строгая фильтрация на стороне клиента ===
 const filteredUsers = computed(() => {
   if (!searchQuery.value) return []
   
@@ -140,30 +127,26 @@ const filteredUsers = computed(() => {
   
   return apiUsers.value.filter(user => 
     user.id !== selectedUser.value?.id &&
-    user.name.toLowerCase().includes(query) // Проверяем, что буква действительно есть в имени
+    user.name.toLowerCase().includes(query) 
   )
 })
-// =====================================================================
 
 function handleSearch() {
   highlightedIndex.value = -1
 }
 
 function handleFocus() {
-  if (blurTimeout) {
-    clearTimeout(blurTimeout)
-    blurTimeout = null
-  }
   if (!selectedUser.value) {
     isFocused.value = true
   }
 }
 
-function handleBlur() {
-  blurTimeout = setTimeout(() => {
-    isFocused.value = false
-    highlightedIndex.value = -1
-  }, 200)
+function handleBlur(event) {
+  if (event.relatedTarget && resultsRef.value?.contains(event.relatedTarget)) {
+    return
+  }
+  isFocused.value = false
+  highlightedIndex.value = -1
 }
 
 function handleKeydown(event) {
@@ -250,8 +233,6 @@ defineExpose({ selectedUser })
 </script>
 
 <style scoped>
-/* === АБСОЛЮТНО ОРИГИНАЛЬНЫЕ СТИЛИ === */
-
 .trend-settings-container {
   width: 893px;
   max-width: 100%;
@@ -416,7 +397,6 @@ defineExpose({ selectedUser })
   object-fit: contain; 
 }
 
-/* Выпадающий список СО СКРОЛЛОМ */
 .search-results {
   position: absolute;
   top: 100%;
@@ -430,10 +410,9 @@ defineExpose({ selectedUser })
   z-index: 10;
   padding: 20px 0;
   
-  max-height: 214px; /* 4 элемента по 50px + padding */
+  max-height: 214px; 
   overflow-y: auto;
   
-  /* Scroll Snap для плавного пошагового скролла */
   scroll-snap-type: y mandatory;
   scroll-padding: 20px 0;
   

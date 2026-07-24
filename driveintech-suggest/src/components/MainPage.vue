@@ -18,18 +18,16 @@
 
 <script setup>
 import { ref } from 'vue'
-import AppInput from '../components/AppInput.vue' 
+import AppInput from './AppInput.vue' 
 
 import mainLogoSrc from '../assets/drive.svg'
 import inputLogoSrc from '../assets/logo.svg'
 import searchIconSrc from '../assets/search.svg'
 
 const handleUserSelect = (user) => {
-  console.log('Пользователь выбран:', user.name)
 }
 
 const handleUserRemove = () => {
-  console.log('Пользователь удален из инпута')
 }
 </script>
 
